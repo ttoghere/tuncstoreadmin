@@ -17,7 +17,10 @@ import 'package:flutter/foundation.dart'
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
-      return web;
+      throw UnsupportedError(
+        'DefaultFirebaseOptions have not been configured for web - '
+        'you can reconfigure this by running the FlutterFire CLI again.',
+      );
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
@@ -26,10 +29,7 @@ class DefaultFirebaseOptions {
           'you can reconfigure this by running the FlutterFire CLI again.',
         );
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -52,13 +52,12 @@ class DefaultFirebaseOptions {
     }
   }
 
-  static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyAbQWegnBBEKRrLaUwc49HZa-ZtqiNgQDk',
-    appId: '1:417058049741:web:3231c2db185212e4d4e384',
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyBGgBh4ZGdDjz7byPT9ZO-Hkq2sx1hjdMA',
+    appId: '1:417058049741:ios:49813a1a2fe76c4ed4e384',
     messagingSenderId: '417058049741',
     projectId: 'tuncstore-55c66',
-    authDomain: 'tuncstore-55c66.firebaseapp.com',
     storageBucket: 'tuncstore-55c66.appspot.com',
-    measurementId: 'G-56RXL9VYV9',
+    iosBundleId: 'site.tunckankilic.tuncstoreadmin',
   );
 }

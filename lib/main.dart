@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:get/get.dart';
-import 'package:tuncstoreadmin/firebase_options.dart';
+import 'package:provider/provider.dart';
+import 'package:tuncstoreadmin/providers/diy_provider.dart';
+import 'package:tuncstoreadmin/screens/diy_screen.dart';
 
-import '/screens/screens.dart';
+import 'consts/theme_data.dart';
+import 'providers/products_provider.dart';
+import 'providers/theme_provider.dart';
+import 'screens/dashboard_screen.dart';
+import 'screens/edit_upload_product_form.dart';
+import 'screens/inner_screen/orders/orders_screen.dart';
+import 'screens/search_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,20 +22,65 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
+  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'My eCommerce Backend',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomeScreen(),
-      getPages: [
-        GetPage(name: '/products', page: () => ProductsScreen()),
-        GetPage(name: '/products/new', page: () => NewProductScreen())
-      ],
-    );
+    return FutureBuilder<FirebaseApp>(
+        future: Firebase.initializeApp(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              home: Scaffold(
+                body: Center(
+                  child: SelectableText(snapshot.error.toString()),
+                ),
+              ),
+            );
+          }
+          return MultiProvider(
+            providers: [
+              ChangeNotifierProvider(create: (_) {
+                return ThemeProvider();
+              }),
+              ChangeNotifierProvider(create: (_) {
+                return ProductsProvider();
+              }),
+              ChangeNotifierProvider(create: (_) {
+                return DIYProvider();
+              })
+            ],
+            child: Consumer<ThemeProvider>(
+                builder: (context, themeProvider, child) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'Shop Smart ADMIN EN',
+                theme: Styles.themeData(
+                    isDarkTheme: themeProvider.getIsDarkTheme,
+                    context: context),
+                home: const DashboardScreen(),
+                routes: {
+                  DIYPanel.routeName: (context) => const DIYPanel(),
+                  OrdersScreenFree.routeName: (context) =>
+                      const OrdersScreenFree(),
+                  SearchScreen.routeName: (context) => const SearchScreen(),
+                  EditOrUploadProductScreen.routeName: (context) =>
+                      const EditOrUploadProductScreen(),
+                },
+              );
+            }),
+          );
+        });
   }
 }
