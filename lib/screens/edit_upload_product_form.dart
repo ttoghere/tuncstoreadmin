@@ -38,7 +38,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
   String? productNetworkImage;
   bool _isLoading = false;
   String? productImageUrl;
-  bool isRecommended = false;
+  bool isRecommended = true;
   bool isPopular = false;
   @override
   void initState() {
@@ -218,20 +218,22 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
     }
   }
 
-  Future<void> localImagePicker(XFile pickedImage) async {
+  Future<void> localImagePicker() async {
     final ImagePicker picker = ImagePicker();
     await MyAppFunctions.imagePickerDialog(
       context: context,
       cameraFCT: () async {
-        _pickedImage = await picker.pickImage(source: ImageSource.camera);
+        final pickedImage = await picker.pickImage(source: ImageSource.camera);
         setState(() {
-          productNetworkImage == null;
+          _pickedImage = pickedImage;
+          productNetworkImage = null;
         });
       },
       galleryFCT: () async {
-        _pickedImage = await picker.pickImage(source: ImageSource.gallery);
+        final pickedImage = await picker.pickImage(source: ImageSource.gallery);
         setState(() {
-          productNetworkImage == null;
+          _pickedImage = pickedImage;
+          productNetworkImage = null;
         });
       },
       removeFCT: () {
@@ -326,7 +328,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                       borderRadius: BorderRadius.circular(12),
                       child: Image.network(
                         productNetworkImage!,
-                        // width: size.width * 0.7,
+                        width: size.width * 0.7,
                         height: size.width * 0.5,
                         alignment: Alignment.center,
                       ),
@@ -336,25 +338,26 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                       width: size.width * 0.4 + 10,
                       height: size.width * 0.4,
                       child: DottedBorder(
-                          child: Center(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            const Icon(
-                              Icons.image_outlined,
-                              size: 80,
-                              color: Colors.blue,
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                localImagePicker(_pickedImage!);
-                              },
-                              child: const Text("Pick Product Image"),
-                            ),
-                          ],
+                        child: Center(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.image_outlined,
+                                size: 80,
+                                color: Colors.blue,
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  localImagePicker();
+                                },
+                                child: const Text("Pick Product Image"),
+                              ),
+                            ],
+                          ),
                         ),
-                      )),
+                      ),
                     ),
                   ] else ...[
                     ClipRRect(
@@ -363,7 +366,7 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                         File(
                           _pickedImage!.path,
                         ),
-                        // width: size.width * 0.7,
+                        width: size.width * 0.7,
                         height: size.width * 0.5,
                         alignment: Alignment.center,
                       ),
@@ -373,12 +376,14 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextButton(
-                          onPressed: () {
-                            localImagePicker(_pickedImage!);
-                          },
-                          child: const Text("Pick another image"),
-                        ),
+                        if (_pickedImage !=
+                            null) // _pickedImage null değilse göster
+                          TextButton(
+                            onPressed: () {
+                              localImagePicker();
+                            },
+                            child: const Text("Pick another image"),
+                          ),
                         TextButton(
                           onPressed: () {
                             removePickedImage();
@@ -492,30 +497,65 @@ class _EditOrUploadProductScreenState extends State<EditOrUploadProductScreen> {
                                 flex: 1,
                                 child: Row(
                                   children: [
-                                    RadioListTile(
-                                      value: isPopular,
-                                      groupValue: false,
-                                      onChanged: (val) {
-                                        setState(() {
-                                          isPopular = val!;
-                                        });
-                                      },
-                                      title: const Text("Is Popular"),
-                                    ),
-                                    RadioListTile(
-                                      value: isPopular,
-                                      groupValue: false,
-                                      onChanged: (val) {
-                                        setState(() {
-                                          isRecommended = val!;
-                                        });
-                                      },
-                                      title: const Text("Is Recommended"),
+                                    Flexible(
+                                      flex: 1,
+                                      child: TextFormField(
+                                        controller: _priceController,
+                                        key: const ValueKey('Price \$'),
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: <TextInputFormatter>[
+                                          FilteringTextInputFormatter.allow(
+                                            RegExp(r'^(\d+)?\.?\d{0,2}'),
+                                          ),
+                                        ],
+                                        decoration: const InputDecoration(
+                                          hintText: 'Price',
+                                          prefix: SubtitleTextWidget(
+                                            label: "\$ ",
+                                            color: Colors.blue,
+                                            fontSize: 16,
+                                          ),
+                                        ),
+                                        validator: (value) {
+                                          return MyValidators.uploadProdTexts(
+                                            value: value,
+                                            toBeReturnedString:
+                                                "Price is missing",
+                                          );
+                                        },
+                                      ),
                                     ),
                                   ],
                                 ),
                               ),
                             ],
+                          ),
+                          SizedBox(
+                            width: 300,
+                            child: RadioListTile(
+                              value:
+                                  false, // isRecommended değerine göre ayarla
+                              groupValue: isRecommended,
+                              onChanged: (val) {
+                                setState(() {
+                                  isRecommended = val!;
+                                });
+                              },
+                              title: const Text("Is Recommended"),
+                            ),
+                          ),
+                          SizedBox(
+                            width: 300,
+                            child: RadioListTile(
+                              value: false, // isPopular değerine göre ayarla
+                              groupValue: isPopular,
+                              onChanged: (val) {
+                                setState(() {
+                                  isPopular = val!;
+                                });
+                              },
+                              title: const Text("Is Popular"),
+                            ),
                           ),
                           const SizedBox(height: 15),
                           TextFormField(

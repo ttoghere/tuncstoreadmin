@@ -65,7 +65,7 @@ class MyApp extends StatelessWidget {
                 builder: (context, themeProvider, child) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'Shop Smart ADMIN EN',
+                title: 'TuncStore ADMIN EN',
                 theme: Styles.themeData(
                     isDarkTheme: themeProvider.getIsDarkTheme,
                     context: context),

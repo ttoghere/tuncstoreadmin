@@ -71,60 +71,42 @@ class MyAppFunctions {
 
   static Future<void> imagePickerDialog({
     required BuildContext context,
-    required Function cameraFCT,
-    required Function galleryFCT,
-    required Function removeFCT,
+    required VoidCallback cameraFCT,
+    required VoidCallback galleryFCT,
+    required VoidCallback removeFCT,
   }) async {
+    // Bu fonksiyonun içindeki kodu kontrol etmelisiniz.
+    // Örneğin, bir AlertDialog kullanılabilir.
     await showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Center(
-              child: TitlesTextWidget(
-                label: "Choose option",
-              ),
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Choose an option'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                cameraFCT();
+              },
+              child: Text('Camera'),
             ),
-            content: SingleChildScrollView(
-              child: ListBody(
-                children: [
-                  TextButton.icon(
-                    onPressed: () {
-                      cameraFCT();
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(Icons.camera),
-                    label: const Text("Camera"),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      galleryFCT();
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.browse_gallery,
-                    ),
-                    label: const Text("Gallery"),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      removeFCT();
-                      if (Navigator.canPop(context)) {
-                        Navigator.pop(context);
-                      }
-                    },
-                    icon: const Icon(
-                      Icons.remove_circle_outline,
-                    ),
-                    label: const Text("Remove"),
-                  ),
-                ],
-              ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                galleryFCT();
+              },
+              child: Text('Gallery'),
             ),
-          );
-        });
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                removeFCT();
+              },
+              child: Text('Remove'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
